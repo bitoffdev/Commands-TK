@@ -1,0 +1,54 @@
+using System.CodeDom.Compiler;
+using System.Reflection;
+using System.Text;
+using UnityEditor;
+using UnityEngine;
+
+public class CommandsWindow : EditorWindow
+{
+	string code = "Debug.Log(\"Hello World!\");";
+	private AdvancedTextEditor editor;
+	
+	// stored away compiler errors (if any) and the compiled method
+    private CompilerErrorCollection compilerErrors = null;
+    private MethodInfo compiledMethod = null;
+	
+	[MenuItem("Window/Commands TK")]
+	static void init(){
+		EditorWindow.GetWindow<CommandsWindow>("Commands");
+	}
+	
+	void OnEnable(){
+		editor = new AdvancedTextEditor(code);
+	}
+	
+	void OnGUI(){
+		//Draw Menubar
+		GUILayout.BeginHorizontal(EditorStyles.toolbar);
+    	if (GUILayout.Button("Run", EditorStyles.toolbarButton)){
+			if (NGCompiler.CompileCSharpImmediateSnippet(code, out compilerErrors, out compiledMethod))
+            {
+                compiledMethod.Invoke(null, null);
+            }
+		}
+		GUILayout.Button("Save", EditorStyles.toolbarButton);
+    	GUILayout.EndHorizontal();
+		//Draw Code Editor
+		code = editor.DrawGUI(GUILayoutUtility.GetRect(200f, 200f, GUILayout.ExpandHeight(true)));
+		//Debug Errors
+		if (compilerErrors != null && compilerErrors.Count > 0)
+        {
+			foreach (CompilerError e in compilerErrors)
+            {
+                if (e.IsWarning)
+                {
+                    Debug.LogWarning (string.Format("Warning on line {0}: {1}\n", e.Line, e.ErrorText));
+                }
+                else
+                {
+                    Debug.LogError (string.Format("Error on line {0}: {1}\n", e.Line, e.ErrorText));
+                }
+            }
+		}
+	}
+}
