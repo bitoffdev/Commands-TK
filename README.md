@@ -1,4 +1,4 @@
-Commands - Unity Code Editor and Executor
+Codify - Unity Code Editor and Executor
 =======================================
 Copyright 2014 EJM Software
 
